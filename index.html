@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jersey Numbers Practice</title>
+  <style>
+    :root{
+      --jersey-red:#c80000;
+      --white:#ffffff;
+      --bg:#0b0c10;
+      --muted:#9aa3b2;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --border: rgba(255,255,255,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 15% 10%, rgba(200,0,0,.18), transparent 55%),
+                  radial-gradient(900px 600px at 85% 20%, rgba(255,255,255,.06), transparent 60%),
+                  var(--bg);
+      color:#e9ecf3;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:18px;
+    }
+    .wrap{
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+    @media (max-width: 860px){ .wrap{grid-template-columns:1fr} }
+
+    .panel{
+      background: rgba(18,20,27,.92);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    header{
+      padding:14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .title{display:flex;flex-direction:column;gap:3px}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title .sub{font-size:12.5px;color:var(--muted)}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-size:12.5px;
+      white-space:nowrap;
+    }
+    .content{padding:16px}
+
+    /* Jersey visual */
+    .stage{display:grid;place-items:center;padding:10px 6px 8px}
+    .jersey{
+      width:min(420px, 92%);
+      aspect-ratio: 3 / 3.3;
+      background: var(--jersey-red);
+      border-radius: 32px;
+      position: relative;
+      box-shadow: 0 18px 45px rgba(0,0,0,.5);
+      border: 4px solid rgba(255,255,255,.22);
+      overflow:hidden;
+    }
+    .jersey:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(200px 120px at 50% 7%, rgba(255,255,255,.20), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.12), transparent 35%),
+        radial-gradient(260px 180px at 50% 55%, rgba(0,0,0,.22), transparent 55%);
+      pointer-events:none;
+    }
+    .collar{
+      position:absolute; top:14px; left:50%;
+      transform:translateX(-50%);
+      width:140px; height:65px;
+      border-radius: 0 0 42px 42px;
+      border: 4px solid rgba(255,255,255,.75);
+      border-top:none;
+      opacity:.95;
+    }
+    .sleeve{
+      position:absolute; top:28px;
+      width:120px; height:120px;
+      background: rgba(0,0,0,.07);
+      border: 3px solid rgba(255,255,255,.18);
+      border-radius:26px;
+    }
+    .sleeve.left{left:-38px; transform: rotate(-12deg)}
+    .sleeve.right{right:-38px; transform: rotate(12deg)}
+    .number{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      font-weight: 900;
+      font-size: clamp(110px, 15vw, 190px);
+      color: var(--white);
+      text-shadow:
+        0 3px 0 rgba(0,0,0,.22),
+        0 10px 30px rgba(0,0,0,.35);
+      letter-spacing:2px;
+      padding-top: 16px;
+      user-select:none;
+    }
+
+    /* Buttons / controls */
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:10px}
+    button{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color:#e9ecf3;
+      cursor:pointer;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    button:hover{background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22)}
+    button:active{transform: translateY(1px)}
+    .primary{background: rgba(200,0,0,.25); border-color: rgba(200,0,0,.55)}
+    .primary:hover{background: rgba(200,0,0,.32); border-color: rgba(200,0,0,.70)}
+
+    .answerBox{
+      width:min(520px, 100%);
+      margin: 12px auto 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      text-align:center;
+      min-height: 54px;
+      display:grid;
+      place-items:center;
+      line-height:1.25;
+    }
+    .muted{color: var(--muted)}
+    .big{font-size:22px; font-weight:800}
+    .small{font-size:12.5px; color: var(--muted)}
+    .settings{display:grid; gap:10px}
+    .setting{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+    }
+    .setting .left{display:grid; gap:4px}
+    .setting .name{font-weight:700; font-size:13.5px}
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+      padding:7px 10px;
+      border-radius:999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:#e9ecf3;
+      font-size:12.5px;
+    }
+    .toggle input{display:none}
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(255,255,255,.25);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    .toggle.on .dot{
+      background: rgba(31,187,106,.95);
+      box-shadow: 0 0 0 6px rgba(31,187,106,.18);
+    }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 860px){ .grid{grid-template-columns: repeat(3, minmax(0,1fr));} }
+    @media (max-width: 520px){ .grid{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    .card{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 10px;
+      cursor:pointer;
+      user-select:none;
+      min-height: 74px;
+      display:grid;
+      gap:4px;
+      align-content:center;
+      justify-items:center;
+      text-align:center;
+    }
+    .card .num{font-weight:900;font-size:20px}
+    .card .lname{font-size:12.5px;color: var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <header>
+        <div class="title">
+          <h1>Jersey Numbers Practice</h1>
+          <div class="sub">Flip-style practice (no typing). Space = Reveal/Hide, → = Next.</div>
+        </div>
+        <div class="pill" id="deckInfo">Deck: 0 players</div>
+      </header>
+
+      <div class="content">
+        <div class="stage">
+          <div class="jersey" aria-label="jersey">
+            <div class="collar"></div>
+            <div class="sleeve left"></div>
+            <div class="sleeve right"></div>
+            <div class="number" id="jerseyNumber">--</div>
+          </div>
+
+          <div class="answerBox" id="answerBox">
+            <div class="muted">Loading roster…</div>
+          </div>
+
+          <div class="row">
+            <button class="primary" id="revealBtn">Reveal</button>
+            <button id="nextBtn">Next</button>
+            <button id="shuffleBtn">Shuffle</button>
+          </div>
+
+          <div class="small" style="text-align:center; margin-top:10px;">
+            Tip: If you update <code>roster.csv</code> on GitHub Pages, just refresh the page to pick up changes.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <header>
+        <div class="title">
+          <h1>Settings & Grid</h1>
+          <div class="sub">This version auto-loads <code>roster.csv</code> on page load (perfect for GitHub Pages).</div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="settings">
+          <div class="setting">
+            <div class="left">
+              <div class="name">Load a different roster CSV</div>
+              <div class="small">Headers: <code>Number</code>, <code>Last Name</code></div>
+            </div>
+            <div><input id="file" type="file" accept=".csv,text/csv" /></div>
+          </div>
+
+          <div class="setting">
+            <div class="left">
+              <div class="name">Auto-hide on Next</div>
+              <div class="small">Keep the name hidden each time you advance.</div>
+            </div>
+            <label class="toggle" id="togAutoHide">
+              <span class="dot"></span><span>On</span>
+              <input type="checkbox" id="autoHide" checked />
+            </label>
+          </div>
+
+          <div class="setting">
+            <div class="left">
+              <div class="name">Show names in grid</div>
+              <div class="small">If Off, grid shows only numbers until you tap.</div>
+            </div>
+            <label class="toggle" id="togGridNames">
+              <span class="dot"></span><span>Off</span>
+              <input type="checkbox" id="gridNames" />
+            </label>
+          </div>
+
+          <div class="row" style="justify-content:flex-start;">
+            <button id="resetBtn">Restart Deck</button>
+          </div>
+
+          <div class="small">Keyboard (desktop): <strong>Space</strong> reveal/hide • <strong>→</strong> next • <strong>S</strong> shuffle</div>
+          <div class="small muted" id="loadStatus" style="margin-top:6px;"></div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+  // State (deck is loaded from roster.csv at runtime)
+  let deck = [];
+  let order = [];
+  let idx = 0;
+  let isRevealed = false;
+
+  const jerseyNumber = document.getElementById('jerseyNumber');
+  const answerBox = document.getElementById('answerBox');
+  const deckInfo = document.getElementById('deckInfo');
+  const loadStatus = document.getElementById('loadStatus');
+
+  const revealBtn = document.getElementById('revealBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const file = document.getElementById('file');
+  const autoHide = document.getElementById('autoHide');
+  const gridNames = document.getElementById('gridNames');
+  const togAutoHide = document.getElementById('togAutoHide');
+  const togGridNames = document.getElementById('togGridNames');
+  const grid = document.getElementById('grid');
+
+  function setToggle(labelEl, on) {
+    labelEl.classList.toggle('on', on);
+    labelEl.querySelector('span:nth-child(2)').textContent = on ? 'On' : 'Off';
+  }
+
+  function buildOrder() {
+    order = [...deck];
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    idx = 0;
+  }
+
+  function current() {
+    if (!order.length) return null;
+    return order[idx % order.length];
+  }
+
+  function updateHeader() {
+    deckInfo.textContent = `Deck: ${deck.length} players`;
+  }
+
+  function renderAnswer(p) {
+    if (!p) {
+      answerBox.innerHTML = `<div class="muted">No roster loaded.</div>`;
+      return;
+    }
+    if (!isRevealed) {
+      answerBox.innerHTML = `<div class="muted">Tap <strong>Reveal</strong> to show the last name.</div>`;
+      revealBtn.textContent = "Reveal";
+    } else {
+      answerBox.innerHTML = `<div class="big">${p.last}</div>`;
+      revealBtn.textContent = "Hide";
+    }
+  }
+
+  function render() {
+    const p = current();
+    if (!p) {
+      jerseyNumber.textContent = "--";
+      renderAnswer(null);
+      updateHeader();
+      grid.innerHTML = "";
+      return;
+    }
+    jerseyNumber.textContent = p.number;
+    renderAnswer(p);
+    updateHeader();
+  }
+
+  function buildGrid() {
+    grid.innerHTML = "";
+    for (let i = 0; i < deck.length; i++) {
+      const p = deck[i];
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = p.number;
+
+      const lname = document.createElement('div');
+      lname.className = 'lname';
+      lname.textContent = gridNames.checked ? p.last : "Tap to reveal";
+
+      card.appendChild(num);
+      card.appendChild(lname);
+
+      let shown = gridNames.checked;
+      card.addEventListener('click', () => {
+        const targetIndex = order.findIndex(x => x.number === p.number && x.last === p.last);
+        if (targetIndex >= 0) idx = targetIndex;
+        isRevealed = false;
+        render();
+
+        if (!gridNames.checked) {
+          shown = !shown;
+          lname.textContent = shown ? p.last : "Tap to reveal";
+        }
+      });
+
+      grid.appendChild(card);
+    }
+  }
+
+  function next() {
+    if (!order.length) return;
+    idx = (idx + 1) % order.length;
+    if (autoHide.checked) isRevealed = false;
+    render();
+  }
+
+  function shuffle() {
+    buildOrder();
+    isRevealed = false;
+    render();
+  }
+
+  function toggleReveal() {
+    const p = current();
+    if (!p) return;
+    isRevealed = !isRevealed;
+    renderAnswer(p);
+  }
+
+  function restart() {
+    idx = 0;
+    isRevealed = false;
+    render();
+  }
+
+  // CSV parsing (handles simple quoted fields)
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      const next = text[i + 1];
+
+      if (c === '"') {
+        if (inQuotes && next === '"') { field += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      } else if (c === ',' && !inQuotes) {
+        row.push(field); field = "";
+      } else if ((c === '\n' || c === '\r') && !inQuotes) {
+        if (c === '\r' && next === '\n') i++;
+        row.push(field);
+        if (row.some(x => String(x).trim().length > 0)) rows.push(row);
+        row = []; field = "";
+      } else {
+        field += c;
+      }
+    }
+    row.push(field);
+    if (row.some(x => String(x).trim().length > 0)) rows.push(row);
+    return rows;
+  }
+
+  function deckFromCSV(text) {
+    const rows = parseCSV(text);
+    if (!rows.length) throw new Error("CSV is empty.");
+
+    const header = rows[0].map(s => String(s).trim().toLowerCase());
+    const idxNum = header.findIndex(h => h === 'number' || h === 'jersey' || h === 'jerseynumber' || h === 'jersey number');
+    const idxLast = header.findIndex(h => h === 'last name' || h === 'lastname' || h === 'last');
+
+    if (idxNum === -1 || idxLast === -1) {
+      throw new Error("CSV headers must include: Number, Last Name");
+    }
+
+    const newDeck = [];
+    for (let i = 1; i < rows.length; i++) {
+      const num = (rows[i][idxNum] ?? "").toString().trim();
+      const last = (rows[i][idxLast] ?? "").toString().trim();
+      if (!num || !last) continue;
+      newDeck.push({ number: num, last: last });
+    }
+    if (!newDeck.length) throw new Error("No valid rows found.");
+    return newDeck;
+  }
+
+  async function loadRosterFromFile(name) {
+    // cache busting helps on some devices; no-store helps too
+    const bust = `?v=${Date.now()}`;
+    const res = await fetch(name + bust, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Could not load ${name} (HTTP ${res.status}).`);
+    return await res.text();
+  }
+
+  async function loadRosterFromRosterCSV() {
+    const text = await loadRosterFromFile("roster.csv");
+    deck = deckFromCSV(text);
+  }
+
+  file.addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+
+    try {
+      const text = await f.text();
+      deck = deckFromCSV(text);
+      buildOrder();
+      isRevealed = false;
+      buildGrid();
+      render();
+      loadStatus.textContent = `Loaded ${deck.length} players from: ${f.name}`;
+    } catch (err) {
+      alert("Roster load failed: " + err.message);
+    }
+  });
+
+  // Toggles
+  function wireToggle(inputEl, labelEl) {
+    setToggle(labelEl, inputEl.checked);
+    labelEl.addEventListener('click', (e) => {
+      if (e.target.tagName.toLowerCase() === 'input') return;
+      inputEl.checked = !inputEl.checked;
+      setToggle(labelEl, inputEl.checked);
+
+      if (inputEl === gridNames) buildGrid();
+    });
+  }
+  wireToggle(autoHide, togAutoHide);
+  wireToggle(gridNames, togGridNames);
+
+  // Buttons
+  revealBtn.addEventListener('click', toggleReveal);
+  nextBtn.addEventListener('click', next);
+  shuffleBtn.addEventListener('click', shuffle);
+  resetBtn.addEventListener('click', restart);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') next();
+    if (e.key.toLowerCase() === 's') shuffle();
+    if (e.key === ' ') { e.preventDefault(); toggleReveal(); }
+  });
+
+  // Init
+  (async () => {
+    try {
+      await loadRosterFromRosterCSV();
+      loadStatus.textContent = `Auto-loaded ${deck.length} players from roster.csv`;
+    } catch (err) {
+      // If someone opens locally (file://), fetch will fail; still allow manual file load.
+      console.error(err);
+      deck = [];
+      loadStatus.textContent = `Auto-load failed (${err.message}). If you're opening locally, use the file picker to load a CSV.`;
+      answerBox.innerHTML = `<div class="muted">Auto-load failed. Use the file picker to load a CSV.</div>`;
+    }
+    buildOrder();
+    buildGrid();
+    render();
+  })();
+</script>
+</body>
+</html>
