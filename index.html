@@ -54,7 +54,6 @@
     }
     .title{display:flex;flex-direction:column;gap:3px}
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .title .sub{font-size:12.5px;color:var(--muted)}
     .pill{
       display:inline-flex;
       align-items:center;
@@ -137,17 +136,26 @@
     }
     button:hover{background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22)}
     button:active{transform: translateY(1px)}
-    .primary{background: var(--maroon); border-color: rgba(var(--gold-rgb),.65)}
-    .primary:hover{background: rgba(var(--maroon-rgb),.72); border-color: var(--gold)}
-
-    .name-display{
-      display:flex;
+    .practice-controls{
+      width:min(420px,100%);
+      display:grid;
+      grid-template-columns:1fr 1fr 1.8fr;
       align-items:center;
-      justify-content:center;
-      flex-wrap:wrap;
       gap:8px;
       margin-top:12px;
     }
+    .practice-controls button{min-height:44px;font-size:1rem}
+    .practice-controls .primary{
+      min-height:52px;
+      font-size:1.125rem;
+      font-weight:800;
+      color:var(--bg);
+      background:var(--gold);
+      border-color:var(--gold);
+    }
+    .practice-controls .primary:hover{background:#c5b47f}
+
+    .setting.name-display{align-items:center;flex-wrap:wrap}
     .name-display select{
       font:inherit;
       color:inherit;
@@ -188,6 +196,8 @@
     .setting .left{display:grid; gap:4px}
     .setting .name{font-weight:700; font-size:13.5px}
     .toggle{
+      position:relative;
+      min-height:44px;
       display:inline-flex;
       align-items:center;
       gap:8px;
@@ -201,7 +211,8 @@
       color:#e9ecf3;
       font-size:12.5px;
     }
-    .toggle input{display:none}
+    .toggle input{position:absolute;opacity:0;width:1px;height:1px}
+    .toggle:focus-within{outline:2px solid var(--gold);outline-offset:2px}
     .dot{
       width:10px;height:10px;border-radius:50%;
       background: rgba(255,255,255,.25);
@@ -245,7 +256,6 @@
       <header>
         <div class="title">
           <h1>Kutztown Jersey Numbers Practice</h1>
-          <div class="sub">Flip-style practice (no typing). Space = Reveal/Hide, → = Next.</div>
         </div>
         <div class="pill" id="deckInfo">Deck: 0 players</div>
       </header>
@@ -263,22 +273,10 @@
             <div class="muted">Loading roster…</div>
           </div>
 
-          <div class="row">
-            <button class="primary" id="revealBtn">Reveal</button>
-            <button id="nextBtn">Next</button>
-            <button id="shuffleBtn">Shuffle</button>
-          </div>
-
-          <div class="name-display">
-            <label for="nameDisplay">Show</label>
-            <select id="nameDisplay">
-              <option value="last">Last name only</option>
-              <option value="full">First and last name</option>
-            </select>
-          </div>
-
-          <div class="small" style="text-align:center; margin-top:10px;">
-            Tip: If you update <code>roster.csv</code> on GitHub Pages, just refresh the page to pick up changes.
+          <div class="practice-controls">
+            <button id="revealBtn">Reveal</button>
+            <button id="backBtn">Back</button>
+            <button class="primary" id="nextBtn">Next</button>
           </div>
         </div>
       </div>
@@ -288,11 +286,29 @@
       <header>
         <div class="title">
           <h1>Settings & Grid</h1>
-          <div class="sub">This version auto-loads <code>roster.csv</code> on page load (perfect for GitHub Pages).</div>
         </div>
       </header>
       <div class="content">
         <div class="settings">
+          <div class="setting name-display">
+            <label class="name" for="nameDisplay">Show</label>
+            <select id="nameDisplay">
+              <option value="last">Last name only</option>
+              <option value="full">First and last name</option>
+            </select>
+          </div>
+
+          <div class="setting">
+            <div class="left">
+              <div class="name" id="shuffleLabel">Shuffle</div>
+              <div class="small">Off follows roster order.</div>
+            </div>
+            <label class="toggle" id="togShuffle">
+              <span class="dot"></span><span>Off</span>
+              <input type="checkbox" id="shuffleEnabled" aria-labelledby="shuffleLabel" />
+            </label>
+          </div>
+
           <div class="setting">
             <div class="left">
               <div class="name">Load a different roster CSV</div>
@@ -303,23 +319,23 @@
 
           <div class="setting">
             <div class="left">
-              <div class="name">Auto-hide on Next</div>
-              <div class="small">Keep the name hidden each time you advance.</div>
+              <div class="name" id="autoHideLabel">Auto-hide on Back or Next</div>
+              <div class="small">Hide the name when you move to another card.</div>
             </div>
             <label class="toggle" id="togAutoHide">
               <span class="dot"></span><span>On</span>
-              <input type="checkbox" id="autoHide" checked />
+              <input type="checkbox" id="autoHide" aria-labelledby="autoHideLabel" checked />
             </label>
           </div>
 
           <div class="setting">
             <div class="left">
-              <div class="name">Show names in grid</div>
+              <div class="name" id="gridNamesLabel">Show names in grid</div>
               <div class="small">If Off, grid shows only numbers until you tap.</div>
             </div>
             <label class="toggle" id="togGridNames">
               <span class="dot"></span><span>Off</span>
-              <input type="checkbox" id="gridNames" />
+              <input type="checkbox" id="gridNames" aria-labelledby="gridNamesLabel" />
             </label>
           </div>
 
@@ -327,7 +343,7 @@
             <button id="resetBtn">Restart Deck</button>
           </div>
 
-          <div class="small">Keyboard (desktop): <strong>Space</strong> reveal/hide • <strong>→</strong> next • <strong>S</strong> shuffle</div>
+          <div class="small">Keyboard (desktop): <strong>Space</strong> reveal/hide • <strong>←</strong> back • <strong>→</strong> next • <strong>S</strong> toggle shuffle</div>
           <div class="small muted" id="loadStatus" style="margin-top:6px;"></div>
         </div>
 
@@ -350,9 +366,12 @@
 
   const nameDisplay = document.getElementById('nameDisplay');
   const nameDisplayKey = 'jerseys.nameDisplay';
+  const shuffleKey = 'jerseys.shuffleEnabled';
+  const shuffleEnabled = document.getElementById('shuffleEnabled');
+  const togShuffle = document.getElementById('togShuffle');
   const revealBtn = document.getElementById('revealBtn');
+  const backBtn = document.getElementById('backBtn');
   const nextBtn = document.getElementById('nextBtn');
-  const shuffleBtn = document.getElementById('shuffleBtn');
   const resetBtn = document.getElementById('resetBtn');
 
   const file = document.getElementById('file');
@@ -369,11 +388,12 @@
 
   function buildOrder() {
     order = [...deck];
-    for (let i = order.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [order[i], order[j]] = [order[j], order[i]];
+    if (shuffleEnabled.checked) {
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
     }
-    idx = 0;
   }
 
   function current() {
@@ -455,16 +475,10 @@
     }
   }
 
-  function next() {
+  function moveCard(step) {
     if (!order.length) return;
-    idx = (idx + 1) % order.length;
+    idx = (idx + step + order.length) % order.length;
     if (autoHide.checked) isRevealed = false;
-    render();
-  }
-
-  function shuffle() {
-    buildOrder();
-    isRevealed = false;
     render();
   }
 
@@ -557,9 +571,8 @@
       const text = await f.text();
       deck = deckFromCSV(text);
       buildOrder();
-      isRevealed = false;
       buildGrid();
-      render();
+      restart();
       loadStatus.textContent = `Loaded ${deck.length} players from: ${f.name}`;
     } catch (err) {
       alert("Roster load failed: " + err.message);
@@ -567,45 +580,59 @@
   });
 
   // Toggles
-  function wireToggle(inputEl, labelEl) {
+  function wireToggle(inputEl, labelEl, onChange) {
     setToggle(labelEl, inputEl.checked);
     inputEl.addEventListener('change', () => {
       setToggle(labelEl, inputEl.checked);
-
-      if (inputEl === gridNames) buildGrid();
+      onChange?.();
     });
   }
-  wireToggle(autoHide, togAutoHide);
-  wireToggle(gridNames, togGridNames);
 
   try {
     if (localStorage.getItem(nameDisplayKey) === 'full') nameDisplay.value = 'full';
+    shuffleEnabled.checked = localStorage.getItem(shuffleKey) === 'true';
   } catch {
-    // The setting still works when storage is unavailable.
+    // The settings still work when storage is unavailable.
   }
 
-  nameDisplay.addEventListener('change', () => {
+  function savePreference(key, value) {
     try {
-      localStorage.setItem(nameDisplayKey, nameDisplay.value);
+      localStorage.setItem(key, value);
     } catch {
       // The setting still applies to this page.
     }
+  }
+
+  wireToggle(autoHide, togAutoHide);
+  wireToggle(gridNames, togGridNames, buildGrid);
+  wireToggle(shuffleEnabled, togShuffle, () => {
+    savePreference(shuffleKey, shuffleEnabled.checked);
+    buildOrder();
+    restart();
+  });
+
+  nameDisplay.addEventListener('change', () => {
+    savePreference(nameDisplayKey, nameDisplay.value);
     renderAnswer(current());
     buildGrid();
   });
 
   // Buttons
   revealBtn.addEventListener('click', toggleReveal);
-  nextBtn.addEventListener('click', next);
-  shuffleBtn.addEventListener('click', shuffle);
+  backBtn.addEventListener('click', () => moveCard(-1));
+  nextBtn.addEventListener('click', () => moveCard(1));
   resetBtn.addEventListener('click', restart);
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    if (e.target === nameDisplay) return;
-    if (e.key === 'ArrowRight') next();
-    if (e.key.toLowerCase() === 's') shuffle();
-    if (e.key === ' ') { e.preventDefault(); toggleReveal(); }
+    if (e.altKey || e.ctrlKey || e.metaKey || e.target.matches('input, select, textarea')) return;
+    if (e.key === 'ArrowLeft') moveCard(-1);
+    if (e.key === 'ArrowRight') moveCard(1);
+    if (e.key.toLowerCase() === 's' && !e.repeat) shuffleEnabled.click();
+    if (e.key === ' ' && !e.target.matches('button')) {
+      e.preventDefault();
+      toggleReveal();
+    }
   });
 
   // Init
@@ -622,7 +649,7 @@
     }
     buildOrder();
     buildGrid();
-    render();
+    restart();
   })();
 </script>
 </body>
