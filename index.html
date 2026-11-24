@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jersey Numbers Practice</title>
+  <title>Kutztown Jersey Numbers Practice</title>
   <style>
     :root{
-      --jersey-red:#c80000;
-      --white:#ffffff;
+      --maroon:#701931;
+      --maroon-rgb:112,25,49;
+      --gold:#b6a268;
+      --gold-rgb:182,162,104;
       --bg:#0b0c10;
       --muted:#9aa3b2;
       --shadow:0 10px 30px rgba(0,0,0,.35);
@@ -18,7 +20,7 @@
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
-      background: radial-gradient(1200px 700px at 15% 10%, rgba(200,0,0,.18), transparent 55%),
+      background: radial-gradient(1200px 700px at 15% 10%, rgba(var(--maroon-rgb),.34), transparent 55%),
                   radial-gradient(900px 600px at 85% 20%, rgba(255,255,255,.06), transparent 60%),
                   var(--bg);
       color:#e9ecf3;
@@ -72,11 +74,11 @@
     .jersey{
       width:min(420px, 92%);
       aspect-ratio: 3 / 3.3;
-      background: var(--jersey-red);
+      background: var(--maroon);
       border-radius: 32px;
       position: relative;
       box-shadow: 0 18px 45px rgba(0,0,0,.5);
-      border: 4px solid rgba(255,255,255,.22);
+      border: 4px solid rgba(var(--gold-rgb),.65);
       overflow:hidden;
     }
     .jersey:before{
@@ -93,7 +95,7 @@
       transform:translateX(-50%);
       width:140px; height:65px;
       border-radius: 0 0 42px 42px;
-      border: 4px solid rgba(255,255,255,.75);
+      border: 4px solid var(--gold);
       border-top:none;
       opacity:.95;
     }
@@ -111,7 +113,7 @@
       display:grid; place-items:center;
       font-weight: 900;
       font-size: clamp(110px, 15vw, 190px);
-      color: var(--white);
+      color: var(--gold);
       text-shadow:
         0 3px 0 rgba(0,0,0,.22),
         0 10px 30px rgba(0,0,0,.35);
@@ -135,8 +137,8 @@
     }
     button:hover{background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22)}
     button:active{transform: translateY(1px)}
-    .primary{background: rgba(200,0,0,.25); border-color: rgba(200,0,0,.55)}
-    .primary:hover{background: rgba(200,0,0,.32); border-color: rgba(200,0,0,.70)}
+    .primary{background: var(--maroon); border-color: rgba(var(--gold-rgb),.65)}
+    .primary:hover{background: rgba(var(--maroon-rgb),.72); border-color: var(--gold)}
 
     .answerBox{
       width:min(520px, 100%);
@@ -188,8 +190,8 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
     }
     .toggle.on .dot{
-      background: rgba(31,187,106,.95);
-      box-shadow: 0 0 0 6px rgba(31,187,106,.18);
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(var(--gold-rgb),.18);
     }
 
     /* Grid */
@@ -215,7 +217,7 @@
       justify-items:center;
       text-align:center;
     }
-    .card .num{font-weight:900;font-size:20px}
+    .card .num{font-weight:900;font-size:20px;color:var(--gold)}
     .card .lname{font-size:12.5px;color: var(--muted)}
   </style>
 </head>
@@ -224,7 +226,7 @@
     <section class="panel">
       <header>
         <div class="title">
-          <h1>Jersey Numbers Practice</h1>
+          <h1>Kutztown Jersey Numbers Practice</h1>
           <div class="sub">Flip-style practice (no typing). Space = Reveal/Hide, → = Next.</div>
         </div>
         <div class="pill" id="deckInfo">Deck: 0 players</div>

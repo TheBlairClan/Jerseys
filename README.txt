@@ -1,10 +1,10 @@
-Jersey Numbers Practice (GitHub Pages-friendly)
+Kutztown Jersey Numbers Practice (GitHub Pages-friendly)
 
 This version auto-loads roster.csv at page load (so edits to roster.csv take effect after refresh).
 
 Files:
 - index.html  (the app)
-- roster.csv  (your roster)
+- roster.csv  (Kutztown women's lacrosse, spring 2027)
 - README.txt
 
 GitHub Pages setup:
