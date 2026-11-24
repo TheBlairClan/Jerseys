@@ -140,6 +140,24 @@
     .primary{background: var(--maroon); border-color: rgba(var(--gold-rgb),.65)}
     .primary:hover{background: rgba(var(--maroon-rgb),.72); border-color: var(--gold)}
 
+    .name-display{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+    .name-display select{
+      font:inherit;
+      color:inherit;
+      background:var(--bg);
+      border:1px solid rgba(var(--gold-rgb),.65);
+      border-radius:8px;
+      padding:6px 8px;
+      color-scheme:dark;
+    }
+
     .answerBox{
       width:min(520px, 100%);
       margin: 12px auto 0;
@@ -251,6 +269,14 @@
             <button id="shuffleBtn">Shuffle</button>
           </div>
 
+          <div class="name-display">
+            <label for="nameDisplay">Show</label>
+            <select id="nameDisplay">
+              <option value="last">Last name only</option>
+              <option value="full">First and last name</option>
+            </select>
+          </div>
+
           <div class="small" style="text-align:center; margin-top:10px;">
             Tip: If you update <code>roster.csv</code> on GitHub Pages, just refresh the page to pick up changes.
           </div>
@@ -270,7 +296,7 @@
           <div class="setting">
             <div class="left">
               <div class="name">Load a different roster CSV</div>
-              <div class="small">Headers: <code>Number</code>, <code>Last Name</code></div>
+              <div class="small">Headers: <code>Number</code>, <code>Last Name</code>, optional <code>First Name</code></div>
             </div>
             <div><input id="file" type="file" accept=".csv,text/csv" /></div>
           </div>
@@ -322,6 +348,8 @@
   const deckInfo = document.getElementById('deckInfo');
   const loadStatus = document.getElementById('loadStatus');
 
+  const nameDisplay = document.getElementById('nameDisplay');
+  const nameDisplayKey = 'jerseys.nameDisplay';
   const revealBtn = document.getElementById('revealBtn');
   const nextBtn = document.getElementById('nextBtn');
   const shuffleBtn = document.getElementById('shuffleBtn');
@@ -357,16 +385,23 @@
     deckInfo.textContent = `Deck: ${deck.length} players`;
   }
 
+  function playerName(p) {
+    return nameDisplay.value === 'full' && p.first ? `${p.first} ${p.last}` : p.last;
+  }
+
   function renderAnswer(p) {
     if (!p) {
       answerBox.innerHTML = `<div class="muted">No roster loaded.</div>`;
       return;
     }
     if (!isRevealed) {
-      answerBox.innerHTML = `<div class="muted">Tap <strong>Reveal</strong> to show the last name.</div>`;
+      answerBox.innerHTML = `<div class="muted">Tap <strong>Reveal</strong> to show the player’s name.</div>`;
       revealBtn.textContent = "Reveal";
     } else {
-      answerBox.innerHTML = `<div class="big">${p.last}</div>`;
+      const answer = document.createElement('div');
+      answer.className = 'big';
+      answer.textContent = playerName(p);
+      answerBox.replaceChildren(answer);
       revealBtn.textContent = "Hide";
     }
   }
@@ -398,7 +433,7 @@
 
       const lname = document.createElement('div');
       lname.className = 'lname';
-      lname.textContent = gridNames.checked ? p.last : "Tap to reveal";
+      lname.textContent = gridNames.checked ? playerName(p) : "Tap to reveal";
 
       card.appendChild(num);
       card.appendChild(lname);
@@ -412,7 +447,7 @@
 
         if (!gridNames.checked) {
           shown = !shown;
-          lname.textContent = shown ? p.last : "Tap to reveal";
+          lname.textContent = shown ? playerName(p) : "Tap to reveal";
         }
       });
 
@@ -482,6 +517,7 @@
 
     const header = rows[0].map(s => String(s).trim().toLowerCase());
     const idxNum = header.findIndex(h => h === 'number' || h === 'jersey' || h === 'jerseynumber' || h === 'jersey number');
+    const idxFirst = header.findIndex(h => h === 'first name' || h === 'firstname' || h === 'first');
     const idxLast = header.findIndex(h => h === 'last name' || h === 'lastname' || h === 'last');
 
     if (idxNum === -1 || idxLast === -1) {
@@ -491,9 +527,10 @@
     const newDeck = [];
     for (let i = 1; i < rows.length; i++) {
       const num = (rows[i][idxNum] ?? "").toString().trim();
+      const first = (rows[i][idxFirst] ?? "").toString().trim();
       const last = (rows[i][idxLast] ?? "").toString().trim();
       if (!num || !last) continue;
-      newDeck.push({ number: num, last: last });
+      newDeck.push({ number: num, first, last });
     }
     if (!newDeck.length) throw new Error("No valid rows found.");
     return newDeck;
@@ -532,9 +569,7 @@
   // Toggles
   function wireToggle(inputEl, labelEl) {
     setToggle(labelEl, inputEl.checked);
-    labelEl.addEventListener('click', (e) => {
-      if (e.target.tagName.toLowerCase() === 'input') return;
-      inputEl.checked = !inputEl.checked;
+    inputEl.addEventListener('change', () => {
       setToggle(labelEl, inputEl.checked);
 
       if (inputEl === gridNames) buildGrid();
@@ -542,6 +577,22 @@
   }
   wireToggle(autoHide, togAutoHide);
   wireToggle(gridNames, togGridNames);
+
+  try {
+    if (localStorage.getItem(nameDisplayKey) === 'full') nameDisplay.value = 'full';
+  } catch {
+    // The setting still works when storage is unavailable.
+  }
+
+  nameDisplay.addEventListener('change', () => {
+    try {
+      localStorage.setItem(nameDisplayKey, nameDisplay.value);
+    } catch {
+      // The setting still applies to this page.
+    }
+    renderAnswer(current());
+    buildGrid();
+  });
 
   // Buttons
   revealBtn.addEventListener('click', toggleReveal);
@@ -551,6 +602,7 @@
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
+    if (e.target === nameDisplay) return;
     if (e.key === 'ArrowRight') next();
     if (e.key.toLowerCase() === 's') shuffle();
     if (e.key === ' ') { e.preventDefault(); toggleReveal(); }

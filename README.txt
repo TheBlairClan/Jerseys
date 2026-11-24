@@ -17,3 +17,4 @@ Updating roster:
 
 CSV format:
 - Headers must include: Number, Last Name
+- Optional: First Name. This enables full names in the Show menu.
